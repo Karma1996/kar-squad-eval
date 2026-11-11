@@ -27,24 +27,44 @@ python3 -m runner run --case cases/quick-01-hotfix.json \
 python3 -m runner score  --record /tmp/records/quick-01.json
 python3 -m runner report --records /tmp/records --baseline baselines/v4.4.json
 
-# 单测（67 条）
+# 单测（96 条）
 python3 -m unittest discover -s tests -t . -v
 ```
 
 退出码：`0` 通过，`1` 存在硬违规或门禁失败，`2` 输入/运行错误。
 
-## 真实跑（P1 待触发）
+## 真实跑：先 preflight，再 smoke
 
 真实跑会创建 issue、唤醒小队、消耗真实 run 与 token。它要求：
 
-1. 沙箱项目（建议 `kar-sim-arena`）与一次性 arena 仓，且 `cases/*.json` 的 `arena.base_sha` 已 pin 到具体 commit（`TBD-*` 会被拒绝）。
-2. 用 **`KAR-SIM-Human` 的 CLI 身份**执行 runner。批准必须由人类成员发出——runner 发现批准来自 agent 会立刻中止，绝不把 agent 评论改写成人类批准。
+1. 沙箱项目（`kar-sim-arena`）与一次性 arena 仓，且 `cases/*.json` 的 `arena.base_sha` 已 pin 到具体 commit（`TBD-*` 会被拒绝）。
+2. 用 **`KAR-SIM-Human` 的 CLI 身份**执行 runner，并且**在普通终端里起**。agent run 会注入 `MULTICA_AGENT_ID` / `MULTICA_TOKEN`，CLI 于是以任务令牌认证、`--profile` 被无视；只 unset token 也不行，CLI 会拒绝。创建成员与 CLI profile 的步骤见 [`../docs/kar-sim-human-setup.md`](../docs/kar-sim-human-setup.md)；`scripts/multica-sim-human` 是加 profile 的包装脚本。
 3. 明确的 token / run 预算与超时。
 
+先跑只读自查（不建 issue、不消耗 run；6 项检查，任一失败退出码 2）：
+
 ```bash
-# 例：在 KAR-SIM-Human 的 CLI profile 下
+export MULTICA_CLI_PATH="$PWD/scripts/multica-sim-human"
+python3 -m runner preflight \
+    --project <sandbox-project-id> --assignee <squad-id> \
+    --arena-repo Karma1996/kar-sim-arena
+```
+
+`preflight` 检查 environment（不在 agent run 里）、identity（CLI 账号与 workspace 里的 `KAR-SIM-Human` 一致且 role=member）、project、assignee、cases pin、arena 仓可读。`run` / `smoke` 的 live 模式在创建 issue 前也会做同样的身份检查——身份不对就以退出码 2 退出，而不是产出 agent 冒名的「人类批准」。
+
+通过后跑 3 条冒烟：
+
+```bash
+python3 -m runner smoke \
+    --project <sandbox-project-id> --assignee <squad-id> \
+    --poll-seconds 120 --max-minutes 240
+```
+
+单条重跑：
+
+```bash
 python3 -m runner run --case cases/standard-01-leaderboard.json \
-    --project <sandbox-project-id> --assignee-id <lead-agent-id> \
+    --project <sandbox-project-id> --assignee <squad-id> \
     --poll-seconds 120 --max-minutes 480 \
     --out records/standard-01.json
 ```
@@ -62,13 +82,17 @@ kar-squad-eval/
 │   ├── contract.py        评论 → 事件（门禁卡识别、绑定、LANE 解析）
 │   ├── platform.py        Platform 协议 + FakePlatform
 │   ├── multica_cli.py     真实 Multica CLI 适配器
+│   ├── identity.py        live 前的 CLI 身份核验（防 agent 冒名 / profile 未生效）
+│   ├── preflight.py       只读前置检查：环境、身份、项目、assignee、pin、arena
 │   ├── sim_human.py       脚本化 Decision Owner
 │   ├── observers.py       GitHub PR / CI / merge 观察器（只读）
 │   ├── loop.py            轮询、超时、停止条件
 │   ├── recorder.py        record.json 组装
 │   ├── report.py          多记录聚合与发布门禁
-│   └── __main__.py        run / smoke / score / report
+│   └── __main__.py        run / smoke / preflight / score / report
 ├── records/               运行记录（不入库；对象存储或 LFS）
+├── scripts/
+│   └── multica-sim-human  CLI 包装：以 KAR-SIM-Human 的 profile 调用 multica
 └── tests/                 评分器 + runner 单测
 ```
 
@@ -92,8 +116,8 @@ kar-squad-eval/
 
 ## 还没做（下一阶段）
 
+- 真实跑第一张基线记分卡（`baselines/` 目前为空）：待 `KAR-SIM-Human` 的 PAT + CLI profile 与 token/run 预算。
 - 隐藏验收用例的注入与 `escaped_defects` 闭环（隐藏测试不能进小队可见仓）。
 - 重复运行 2–3 次取最差、flaky 标记。
 - 24h / 26h 长周期用例的排期与真机计时。
 - T0（配置 PR 冒烟）/ T2（每夜）调度接入。
-- 真实跑第一张基线记分卡（`baselines/` 目前为空）。

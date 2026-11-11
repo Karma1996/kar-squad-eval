@@ -1,0 +1,32 @@
+#!/bin/sh
+# Run the Multica CLI as the dedicated simulation human (KAR-SIM-Human).
+#
+# The runner shells out to whatever MULTICA_CLI_PATH points at. This wrapper adds
+# the CLI profile, so every issue, comment and approval the runner creates is
+# attributed to the human member instead of the operator's own account. Approval
+# semantics depend on that attribution: the platform reports author_type=member
+# only for a human, and the runner aborts rather than rewriting an agent comment
+# into a human approval.
+#
+# One-time setup (see docs/kar-sim-human-setup.md):
+#   multica --profile kar-sim-human login --token
+#
+# Use:
+#   export MULTICA_CLI_PATH="$PWD/kar-squad-eval/scripts/multica-sim-human"
+#
+# Overrides: KAR_SIM_CLI (default: multica), KAR_SIM_PROFILE (default: kar-sim-human).
+set -eu
+
+cli="${KAR_SIM_CLI:-multica}"
+profile="${KAR_SIM_PROFILE:-kar-sim-human}"
+
+# An agent run exports MULTICA_TOKEN for its temporary task token; the CLI then
+# authenticates as the agent no matter which profile is selected. Refuse instead
+# of silently producing agent-authored "approvals".
+if [ -n "${MULTICA_TOKEN:-}" ]; then
+	printf '%s\n' "multica-sim-human: MULTICA_TOKEN is set, so the CLI would authenticate as that token, not the '$profile' profile." >&2
+	printf '%s\n' "Run live simulations from a plain terminal, outside the agent run." >&2
+	exit 2
+fi
+
+exec "$cli" --profile "$profile" "$@"
