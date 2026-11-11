@@ -69,12 +69,32 @@ class ScenarioTests(unittest.TestCase):
             parse_scenario(raw)
 
     def test_live_run_refuses_unpinned_case(self):
-        scenario = load_scenario(ROOT / "cases" / "quick-01-hotfix.json")
-        self.assertFalse(scenario.pinned)  # golden cases still carry TBD
+        scenario = parse_scenario(
+            {
+                "schema_version": 1,
+                "id": "x-01",
+                "lane": "quick",
+                "title": "t",
+                "intent": "i",
+                "arena": {
+                    "repo": "r",
+                    "base_sha": "TBD-pin-before-first-run",
+                    "seed": "s",
+                },
+                "expected": {"lane": "quick"},
+            }
+        )
+        self.assertFalse(scenario.pinned)
         clock = FakeClock()
         platform = FakePlatform(clock)
         with self.assertRaises(RunnerError):
             run_case(scenario, platform, clock, RunConfig(mode="live"))
+
+    def test_golden_cases_are_pinned(self):
+        for path in (ROOT / "cases").glob("*.json"):
+            if path.name == "smoke.json":
+                continue
+            self.assertTrue(load_scenario(path).pinned, path.name)
 
 
 if __name__ == "__main__":

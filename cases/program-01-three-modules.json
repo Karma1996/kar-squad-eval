@@ -7,8 +7,8 @@
   "intent": "把街机扩成三个模块：游戏核心（状态机与计分）、排行榜 API（读写与分页）、登录（本地账号与会话）。父 issue 负责契约、拆分、集成与验收，子 issue 并行推进，最后一起合入。",
   "risk": "R2",
   "arena": {
-    "repo": "kar-sim-arena/arcade",
-    "base_sha": "TBD-pin-before-first-run",
+    "repo": "Karma1996/kar-sim-arena",
+    "base_sha": "b18e66880cd0d68549a7072840f89e5cc7eb5bf2",
     "seed": "three-module-program"
   },
   "human_policy": [

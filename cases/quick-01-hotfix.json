@@ -7,8 +7,8 @@
   "intent": "生产部署文档里写了 `deploy.py --dry-run`，但脚本实际报 `unrecognized arguments: --dry-run`。请修复这个参数，并保证 `--apply` 与 `--dry-run` 互斥。",
   "risk": "R1",
   "arena": {
-    "repo": "kar-sim-arena/arcade",
-    "base_sha": "TBD-pin-before-first-run",
+    "repo": "Karma1996/kar-sim-arena",
+    "base_sha": "b18e66880cd0d68549a7072840f89e5cc7eb5bf2",
     "seed": "deploy-cli-missing-dry-run"
   },
   "human_policy": [

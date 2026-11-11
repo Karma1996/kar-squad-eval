@@ -7,8 +7,8 @@
   "intent": "在排行榜页面基础上加「本周冠军」高亮：按自然周聚合、处理并列、缓存 1 小时；H2 方案确认后进入开发。",
   "risk": "R2",
   "arena": {
-    "repo": "kar-sim-arena/arcade",
-    "base_sha": "TBD-pin-before-first-run",
+    "repo": "Karma1996/kar-sim-arena",
+    "base_sha": "b18e66880cd0d68549a7072840f89e5cc7eb5bf2",
     "seed": "leaderboard-weekly-champion"
   },
   "human_policy": [
