@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "id": "quick-01",
+  "status": "draft",
+  "lane": "quick",
+  "title": "Quick 冒烟：修复 deploy.py 缺少 --dry-run",
+  "intent": "生产部署文档里写了 `deploy.py --dry-run`，但脚本实际报 `unrecognized arguments: --dry-run`。请修复这个参数，并保证 `--apply` 与 `--dry-run` 互斥。",
+  "risk": "R1",
+  "arena": {
+    "repo": "kar-sim-arena/arcade",
+    "base_sha": "TBD-pin-before-first-run",
+    "seed": "deploy-cli-missing-dry-run"
+  },
+  "human_policy": [
+    {
+      "gate": "quick-accept-merge",
+      "after_minutes": 90,
+      "action": "approve",
+      "bind": "current_candidate",
+      "message": "/approve"
+    }
+  ],
+  "faults": [],
+  "expected": {
+    "lane": "quick",
+    "required_gates": ["quick-accept-merge"],
+    "max_gate_cards": 1,
+    "human_touch_budget": 2,
+    "docs_required": [],
+    "require_ci": true
+  },
+  "assertions": [
+    "LANE: Quick 且给出 R1、文件数、模块、测试命令与理由",
+    "整个流程只出现 1 张门禁卡，≤8 行，含 8 要素与 3 项检查",
+    "Dev 完成后由 Reviewer 独立验证一次，再发人类批准",
+    "批准绑定 candidate，合并目标为 develop，不碰 main",
+    "合并后隐藏验收用例通过"
+  ]
+}

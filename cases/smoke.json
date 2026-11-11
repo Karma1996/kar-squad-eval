@@ -1,0 +1,5 @@
+{
+  "version": "eval-v1",
+  "description": "T0 smoke set: one case per lane. Frozen inputs; run on every change to skills, instructions, model or runtime.",
+  "cases": ["quick-01", "standard-01", "program-01"]
+}

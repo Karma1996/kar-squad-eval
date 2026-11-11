@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "case_id": "quick-01",
+  "lane": "quick",
+  "squad_version": "4.4.0",
+  "expected": {
+    "lane": "quick",
+    "required_gates": ["quick-accept-merge"],
+    "max_gate_cards": 1,
+    "human_touch_budget": 2,
+    "docs_required": [],
+    "require_ci": true
+  },
+  "events": [
+    {"t": "2026-11-11T09:00:00Z", "type": "issue_created", "actor_type": "human", "actor": "sim-human"},
+    {"t": "2026-11-11T09:01:00Z", "type": "lane_classified", "actor_type": "agent", "actor": "KAR-01-Lead", "lane": "Quick", "rationale": "R1, 2 files, module cli, tests: pytest tests/test_deploy.py"},
+    {"t": "2026-11-11T09:05:00Z", "type": "handoff", "actor_type": "agent", "actor": "KAR-05-Developer", "result": "accepted", "evidence": "commit abc123, 2 files, tests green"},
+    {"t": "2026-11-11T09:20:00Z", "type": "comment", "actor_type": "agent", "actor": "KAR-01-Lead", "kind": "gate_card", "gate": "quick-accept-merge", "candidate": "candidate/KAR-101-abc123", "lines": 8, "fields": {"action": "Approve merge of the --dry-run fix", "decision_owner": "sim-human", "version": "candidate/KAR-101-abc123", "checks": ["fix covered by test", "reviewer verified independently", "CI green"], "rationale": "R1, reversible, 2 files", "conditions": "none", "copy_line": "/approve", "consequence": "fix stays unmerged"}},
+    {"t": "2026-11-11T09:50:00Z", "type": "approval", "actor_type": "human", "actor": "sim-human", "gate": "quick-accept-merge", "candidate": "candidate/KAR-101-abc123", "decision": "approve"},
+    {"t": "2026-11-11T10:00:00Z", "type": "ci", "status": "green", "sha": "def456"},
+    {"t": "2026-11-11T10:05:00Z", "type": "merge", "actor_type": "agent", "actor": "KAR-01-Lead", "branch": "develop", "candidate": "candidate/KAR-101-abc123", "sha": "def456", "gate": "quick-accept-merge"}
+  ]
+}

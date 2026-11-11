@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "id": "standard-01",
+  "status": "draft",
+  "lane": "standard",
+  "title": "Standard 冒烟：排行榜页面（UI + 持久化）",
+  "intent": "给街机加一个排行榜页面：显示 Top 10、按分数排序、分页，数据持久化到本地文件；要响应式并支持暗色模式。按需求 → 设计 → 验收的完整流程走。",
+  "risk": "R2",
+  "arena": {
+    "repo": "kar-sim-arena/arcade",
+    "base_sha": "TBD-pin-before-first-run",
+    "seed": "leaderboard-feature"
+  },
+  "human_policy": [
+    {
+      "gate": "h1-requirements",
+      "after_minutes": 45,
+      "action": "approve",
+      "bind": "current_candidate",
+      "message": "/approve"
+    },
+    {
+      "gate": "h2-design",
+      "after_minutes": 45,
+      "action": "approve",
+      "bind": "current_candidate",
+      "message": "/approve"
+    },
+    {
+      "gate": "h3-accept-merge",
+      "after_minutes": 45,
+      "action": "approve",
+      "bind": "current_candidate",
+      "message": "/approve"
+    }
+  ],
+  "faults": [],
+  "expected": {
+    "lane": "standard",
+    "required_gates": ["h1-requirements", "h2-design", "h3-accept-merge"],
+    "max_gate_cards": 3,
+    "human_touch_budget": 7,
+    "docs_required": ["docs/REQUIREMENTS.md", "docs/DESIGN.md", "docs/TEST-DESIGN.md"],
+    "require_ci": true
+  },
+  "assertions": [
+    "H1/H2/H3 顺序正确，每道门 1 张卡，≤8 行，含 3 项检查与理由",
+    "批准绑定 candidate；A4/A5 与 H3 使用同一 candidate，late push 使其失效",
+    "原型在 H1 同批批准，开发后未变；视觉回归通过",
+    "H3 前 A4/A5 通过、CI 全绿、无 S0–S2；合并 develop 且不回退 main",
+    "合并后隐藏验收用例通过"
+  ]
+}

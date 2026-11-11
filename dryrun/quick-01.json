@@ -1,0 +1,38 @@
+{
+  "case_id": "quick-01",
+  "note": "Dry-run transcript: what a healthy squad and the scripted human would put on the platform. Used to exercise the loop, not to prove squad quality.",
+  "steps": [
+    {
+      "at_minutes": 1,
+      "comment": {
+        "author_type": "agent",
+        "author": "KAR-01-Lead",
+        "body": "LANE: Quick — R1，2 个文件，模块 cli，测试：pytest tests/test_deploy.py。\n\n已派发 KAR-05-Developer。"
+      }
+    },
+    {
+      "at_minutes": 10,
+      "comment": {
+        "author_type": "agent",
+        "author": "KAR-01-Lead",
+        "body": "行动：批准把 candidate/KAR-101-abc123 合入 develop\n谁决定：KAR-SIM-Human（Decision Owner）\n绑定版本：candidate/KAR-101-abc123\n检查：--dry-run 有回归测试 / Reviewer 独立验证 / CI 全绿\n理由：R1 低风险，2 个文件，可回滚\n附条件：无\n复制：/approve\n不做的后果：修复继续停在分支上\n<!-- kar-gate: quick-accept-merge -->"
+      }
+    },
+    {
+      "at_minutes": 120,
+      "record": {"type": "ci", "status": "green", "sha": "abc123"}
+    },
+    {
+      "at_minutes": 125,
+      "record": {
+        "type": "merge",
+        "actor_type": "agent",
+        "branch": "develop",
+        "candidate": "candidate/KAR-101-abc123",
+        "sha": "abc123",
+        "gate": "quick-accept-merge"
+      }
+    },
+    {"at_minutes": 126, "status": "done"}
+  ]
+}

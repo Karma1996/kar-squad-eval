@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "case_id": "program-02",
+  "lane": "program",
+  "squad_version": "4.5.0",
+  "expected": {
+    "lane": "program",
+    "required_gates": ["h3-accept-merge"],
+    "max_gate_cards": 4,
+    "human_touch_budget": 4,
+    "docs_required": ["docs/PROGRAM-CONTRACT.md"],
+    "require_ci": true
+  },
+  "events": [
+    {"t": "2026-11-11T09:00:00Z", "type": "issue_created", "actor_type": "human", "actor": "sim-human"},
+    {"t": "2026-11-11T09:04:00Z", "type": "lane_classified", "actor_type": "agent", "actor": "KAR-01-Lead", "lane": "Program", "rationale": "R2, 3 modules, 2 child issues parallel"},
+    {"t": "2026-11-11T09:15:00Z", "type": "docs_written", "actor_type": "agent", "paths": ["docs/PROGRAM-CONTRACT.md", "docs/INTEGRATION.md"]},
+    {"t": "2026-11-11T09:30:00Z", "type": "comment", "actor_type": "agent", "actor": "KAR-01-Lead", "kind": "gate_card", "gate": "wave-1", "candidate": "candidate/KAR-303-wave1", "lines": 8, "fields": {"action": "Approve wave 1", "decision_owner": "sim-human", "version": "candidate/KAR-303-wave1", "checks": ["contract frozen", "3 children scoped", "integration branch ready"], "rationale": "program split", "conditions": "none", "copy_line": "/approve", "consequence": "no child starts"}},
+    {"t": "2026-11-11T09:50:00Z", "type": "approval", "actor_type": "human", "actor": "sim-human", "gate": "wave-1", "candidate": "candidate/KAR-303-wave1", "decision": "approve"},
+    {"t": "2026-11-11T11:00:00Z", "type": "comment", "actor_type": "agent", "actor": "KAR-01-Lead", "kind": "gate_card", "gate": "h2-design", "candidate": "candidate/KAR-303-design", "lines": 8, "fields": {"action": "Approve integration design", "decision_owner": "sim-human", "version": "candidate/KAR-303-design", "checks": ["merge order defined", "interface contracts fixed", "rollback defined"], "rationale": "three modules", "conditions": "none", "copy_line": "/approve", "consequence": "integration blocked"}},
+    {"t": "2026-11-11T11:20:00Z", "type": "approval", "actor_type": "human", "actor": "sim-human", "gate": "h2-design", "candidate": "candidate/KAR-303-design", "decision": "approve"},
+    {"t": "2026-11-11T12:00:00Z", "type": "ci", "status": "green", "sha": "bbb222"},
+    {"t": "2026-11-11T12:10:00Z", "type": "merge", "actor_type": "agent", "actor": "KAR-01-Lead", "branch": "develop", "candidate": "candidate/KAR-303-final", "sha": "bbb222", "gate": "h3-accept-merge"}
+  ]
+}

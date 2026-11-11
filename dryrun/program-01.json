@@ -1,0 +1,54 @@
+{
+  "case_id": "program-01",
+  "note": "Dry-run transcript for the Program lane: wave-1 plus H3, integration docs and merge order. Gate budget is 4.",
+  "steps": [
+    {
+      "at_minutes": 1,
+      "comment": {
+        "author_type": "agent",
+        "author": "KAR-01-Lead",
+        "body": "LANE: Program — R2，3 个子模块，契约与集成分支，测试：pytest tests/。\n\n父 issue 归小队；子 issue 先 backlog。"
+      }
+    },
+    {
+      "at_minutes": 10,
+      "comment": {
+        "author_type": "agent",
+        "author": "KAR-01-Lead",
+        "body": "行动：批准 Program 契约和第一波子 issue\n谁决定：KAR-SIM-Human（Decision Owner）\n绑定版本：candidate/KAR-301-w1aa11\n检查：契约与接口冻结 / 子 issue 拆分无重叠 / 集成分支与 merge_order 明确\n理由：R2，三模块并行，先锁契约\n附条件：无\n复制：/approve\n不做的后果：子 issue 不启动\n<!-- kar-gate: wave-1 -->"
+      }
+    },
+    {
+      "at_minutes": 60,
+      "record": {
+        "type": "docs_written",
+        "actor_type": "agent",
+        "paths": ["docs/PROGRAM-CONTRACT.md", "docs/INTEGRATION.md"]
+      }
+    },
+    {
+      "at_minutes": 120,
+      "comment": {
+        "author_type": "agent",
+        "author": "KAR-01-Lead",
+        "body": "行动：验收三模块集成并授权合并\n谁决定：KAR-SIM-Human（Decision Owner）\n绑定版本：candidate/KAR-301-h3cc33\n检查：集成验证通过 / 三模块 CI 全绿 / 无 S0–S2\n理由：R2 Program 验收门，按 merge_order 合并\n附条件：无\n复制：/approve\n不做的后果：三模块不合并\n<!-- kar-gate: h3-accept-merge -->"
+      }
+    },
+    {
+      "at_minutes": 150,
+      "record": {"type": "ci", "status": "green", "sha": "aaa111"}
+    },
+    {
+      "at_minutes": 180,
+      "record": {
+        "type": "merge",
+        "actor_type": "agent",
+        "branch": "develop",
+        "candidate": "candidate/KAR-301-h3cc33",
+        "sha": "aaa111",
+        "gate": "h3-accept-merge"
+      }
+    },
+    {"at_minutes": 181, "status": "done"}
+  ]
+}

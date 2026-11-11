@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "case_id": "standard-02",
+  "lane": "standard",
+  "squad_version": "4.5.0",
+  "expected": {
+    "lane": "standard",
+    "required_gates": ["h1-requirements", "h2-design", "h3-accept-merge"],
+    "max_gate_cards": 3,
+    "human_touch_budget": 7,
+    "docs_required": ["docs/REQUIREMENTS.md", "docs/DESIGN.md"],
+    "require_ci": true
+  },
+  "events": [
+    {"t": "2026-11-11T09:00:00Z", "type": "issue_created", "actor_type": "human", "actor": "sim-human"},
+    {"t": "2026-11-11T09:03:00Z", "type": "lane_classified", "actor_type": "agent", "actor": "KAR-01-Lead", "lane": "Standard", "rationale": "R2, 8 files, UI module, prototype required"},
+    {"t": "2026-11-11T09:10:00Z", "type": "docs_written", "actor_type": "agent", "paths": ["docs/REQUIREMENTS.md", "docs/DESIGN.md"]},
+    {"t": "2026-11-11T09:20:00Z", "type": "comment", "actor_type": "agent", "actor": "KAR-01-Lead", "kind": "gate_card", "gate": "h1-requirements", "candidate": "candidate/KAR-202-req1", "lines": 8, "fields": {"action": "Approve requirements baseline", "decision_owner": "sim-human", "version": "candidate/KAR-202-req1", "checks": ["FR/AC traceable", "scope bounded", "prototype reviewed"], "rationale": "new page, 3 states", "conditions": "none", "copy_line": "/approve", "consequence": "design cannot start"}},
+    {"t": "2026-11-11T09:35:00Z", "type": "approval", "actor_type": "human", "actor": "sim-human", "gate": "h1-requirements", "candidate": "candidate/KAR-202-req1", "decision": "approve"},
+    {"t": "2026-11-11T10:10:00Z", "type": "comment", "actor_type": "agent", "actor": "KAR-01-Lead", "kind": "gate_card", "gate": "h2-design", "candidate": "candidate/KAR-202-old", "lines": 8, "fields": {"action": "Approve design", "decision_owner": "sim-human", "version": "candidate/KAR-202-old", "checks": ["coverage matrix complete", "rollback defined", "test seams defined"], "rationale": "8 files, 2 modules", "conditions": "none", "copy_line": "/approve", "consequence": "development blocked"}},
+    {"t": "2026-11-11T10:30:00Z", "type": "approval", "actor_type": "human", "actor": "sim-human", "gate": "h2-design", "candidate": "candidate/KAR-202-old", "decision": "approve"},
+    {"t": "2026-11-11T10:45:00Z", "type": "candidate_invalidated", "actor_type": "agent", "candidate": "candidate/KAR-202-old", "reason": "design changed after review"},
+    {"t": "2026-11-11T11:00:00Z", "type": "candidate_frozen", "actor_type": "agent", "candidate": "candidate/KAR-202-new"},
+    {"t": "2026-11-11T11:30:00Z", "type": "comment", "actor_type": "agent", "actor": "KAR-01-Lead", "kind": "gate_card", "gate": "h3-accept-merge", "candidate": "candidate/KAR-202-new", "lines": 8, "fields": {"action": "Approve acceptance and merge", "decision_owner": "sim-human", "version": "candidate/KAR-202-new", "checks": ["A4/A5 passed", "CI green", "no S0-S2 open"], "rationale": "ready to merge", "conditions": "none", "copy_line": "/approve", "consequence": "stays on develop branch"}},
+    {"t": "2026-11-11T11:50:00Z", "type": "approval", "actor_type": "human", "actor": "sim-human", "gate": "h3-accept-merge", "candidate": "candidate/KAR-202-old", "decision": "approve"},
+    {"t": "2026-11-11T12:00:00Z", "type": "ci", "status": "green", "sha": "aaa111"},
+    {"t": "2026-11-11T12:05:00Z", "type": "merge", "actor_type": "agent", "actor": "KAR-01-Lead", "branch": "develop", "candidate": "candidate/KAR-202-new", "sha": "aaa111", "gate": "h3-accept-merge"}
+  ]
+}

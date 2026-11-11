@@ -1,0 +1,68 @@
+{
+  "case_id": "standard-01",
+  "note": "Dry-run transcript for the Standard lane: three gates, docs, CI, then merge. Exercises gate ordering and candidate binding.",
+  "steps": [
+    {
+      "at_minutes": 1,
+      "comment": {
+        "author_type": "agent",
+        "author": "KAR-01-Lead",
+        "body": "LANE: Standard — R2，8 个文件，模块 ui/api，测试：pytest tests/test_leaderboard.py。\n\n先发需求草稿，H1 后再进设计。"
+      }
+    },
+    {
+      "at_minutes": 10,
+      "comment": {
+        "author_type": "agent",
+        "author": "KAR-01-Lead",
+        "body": "行动：确认排行榜需求（Top 10、分页、持久化）\n谁决定：KAR-SIM-Human（Decision Owner）\n绑定版本：candidate/KAR-201-h1aa11\n检查：5 份文档齐全 / FR/AC/SC 可追溯 / 原型可离线打开\n理由：R2，UI + 持久化，需要完整门禁\n附条件：无\n复制：/approve\n不做的后果：开发无法开始\n<!-- kar-gate: h1-requirements -->"
+      }
+    },
+    {
+      "at_minutes": 70,
+      "comment": {
+        "author_type": "agent",
+        "author": "KAR-01-Lead",
+        "body": "行动：确认排行榜设计方案\n谁决定：KAR-SIM-Human（Decision Owner）\n绑定版本：candidate/KAR-201-h2bb22\n检查：A4/A5 计划明确 / 数据模型可回滚 / 视觉回归方案就绪\n理由：R2 设计门，方案冻结后才开发\n附条件：无\n复制：/approve\n不做的后果：不进入开发\n<!-- kar-gate: h2-design -->"
+      }
+    },
+    {
+      "at_minutes": 130,
+      "comment": {
+        "author_type": "agent",
+        "author": "KAR-01-Lead",
+        "body": "行动：验收并授权合并排行榜功能\n谁决定：KAR-SIM-Human（Decision Owner）\n绑定版本：candidate/KAR-201-h3cc33\n检查：A4/A5 通过 / CI 全绿 / 无 S0–S2\n理由：R2 验收门，合并到 develop\n附条件：无\n复制：/approve\n不做的后果：功能不合并\n<!-- kar-gate: h3-accept-merge -->"
+      }
+    },
+    {
+      "at_minutes": 150,
+      "record": {
+        "type": "docs_written",
+        "actor_type": "agent",
+        "paths": [
+          "docs/REQUIREMENTS.md",
+          "docs/DESIGN.md",
+          "docs/TEST-DESIGN.md",
+          "docs/ACCEPTANCE.md",
+          "docs/TRACEABILITY.md"
+        ]
+      }
+    },
+    {
+      "at_minutes": 165,
+      "record": {"type": "ci", "status": "green", "sha": "def456"}
+    },
+    {
+      "at_minutes": 200,
+      "record": {
+        "type": "merge",
+        "actor_type": "agent",
+        "branch": "develop",
+        "candidate": "candidate/KAR-201-h3cc33",
+        "sha": "def456",
+        "gate": "h3-accept-merge"
+      }
+    },
+    {"at_minutes": 201, "status": "done"}
+  ]
+}

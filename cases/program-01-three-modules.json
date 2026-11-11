@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "id": "program-01",
+  "status": "draft",
+  "lane": "program",
+  "title": "Program 冒烟：游戏核心 / 排行榜 API / 登录三模块",
+  "intent": "把街机扩成三个模块：游戏核心（状态机与计分）、排行榜 API（读写与分页）、登录（本地账号与会话）。父 issue 负责契约、拆分、集成与验收，子 issue 并行推进，最后一起合入。",
+  "risk": "R2",
+  "arena": {
+    "repo": "kar-sim-arena/arcade",
+    "base_sha": "TBD-pin-before-first-run",
+    "seed": "three-module-program"
+  },
+  "human_policy": [
+    {
+      "gate": "wave-1",
+      "after_minutes": 45,
+      "action": "approve",
+      "bind": "current_candidate",
+      "message": "/approve"
+    },
+    {
+      "gate": "h3-accept-merge",
+      "after_minutes": 45,
+      "action": "approve",
+      "bind": "current_candidate",
+      "message": "/approve"
+    }
+  ],
+  "faults": [],
+  "expected": {
+    "lane": "program",
+    "required_gates": ["wave-1", "h3-accept-merge"],
+    "max_gate_cards": 4,
+    "human_touch_budget": 4,
+    "docs_required": ["docs/PROGRAM-CONTRACT.md", "docs/INTEGRATION.md"],
+    "require_ci": true
+  },
+  "assertions": [
+    "父 issue 始终归小队，不分配给个人 agent；契约、拆分、集成、H3 由 Lead 负责",
+    "子 issue 先 backlog，人类批准 wave 1 后才 todo；stage 屏障生效",
+    "默认集成分支，merge_order 明确；子 PR 不互相踩",
+    "父级 H3 前集成验证通过、CI 全绿、无 S0–S2 未关闭",
+    "隐藏验收用例通过"
+  ]
+}
