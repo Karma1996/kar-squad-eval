@@ -15,6 +15,8 @@ import subprocess
 from dataclasses import dataclass, field
 from typing import Any, Callable, Mapping, Sequence
 
+from pathlib import Path
+
 from .identity import IdentityError, Member, check_task_environment, verify
 from .scenario import ScenarioError, load_scenario, load_smoke
 
@@ -63,9 +65,15 @@ def _json(run: Run, args: Sequence[str]) -> Any:
     return json.loads(out)
 
 
-def _identity_check(cli: str, name: str, env: Mapping[str, str] | None, run: Run) -> Check:
+def _identity_check(
+    cli: str,
+    name: str,
+    env: Mapping[str, str] | None,
+    run: Run,
+    cwd: str | Path | None,
+) -> Check:
     try:
-        member: Member = verify(cli, name, env=env, run=run)
+        member: Member = verify(cli, name, env=env, cwd=cwd, run=run)
     except IdentityError as exc:
         return Check("identity", False, str(exc))
     return Check(
@@ -75,9 +83,9 @@ def _identity_check(cli: str, name: str, env: Mapping[str, str] | None, run: Run
     )
 
 
-def _environment_check(env: Mapping[str, str] | None) -> Check:
+def _environment_check(env: Mapping[str, str] | None, cwd: str | Path | None) -> Check:
     try:
-        check_task_environment(env)
+        check_task_environment(env, cwd)
     except IdentityError as exc:
         return Check("environment", False, str(exc))
     return Check("environment", True, "no MULTICA_TOKEN in the environment")
@@ -167,14 +175,15 @@ def run_preflight(
     cases_dir: str = "cases",
     arena_repo: str | None = None,
     env: Mapping[str, str] | None = None,
+    cwd: str | Path | None = None,
     run: Run | None = None,
     gh_run: Run | None = None,
     check_gh: bool = True,
 ) -> Preflight:
     run = run or _subprocess_run(cli)
     report = Preflight()
-    report.checks.append(_environment_check(env))
-    report.checks.append(_identity_check(cli, human, env, run))
+    report.checks.append(_environment_check(env, cwd))
+    report.checks.append(_identity_check(cli, human, env, run, cwd))
     report.checks.append(_project_check(project_id, run))
     report.checks.append(_assignee_check(assignee_id, run))
     report.checks.append(_cases_check(cases_dir))

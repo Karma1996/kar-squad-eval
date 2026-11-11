@@ -27,7 +27,7 @@ python3 -m runner run --case cases/quick-01-hotfix.json \
 python3 -m runner score  --record /tmp/records/quick-01.json
 python3 -m runner report --records /tmp/records --baseline baselines/v4.4.json
 
-# 单测（96 条）
+# 单测（98 条）
 python3 -m unittest discover -s tests -t . -v
 ```
 
@@ -38,7 +38,7 @@ python3 -m unittest discover -s tests -t . -v
 真实跑会创建 issue、唤醒小队、消耗真实 run 与 token。它要求：
 
 1. 沙箱项目（`kar-sim-arena`）与一次性 arena 仓，且 `cases/*.json` 的 `arena.base_sha` 已 pin 到具体 commit（`TBD-*` 会被拒绝）。
-2. 用 **`KAR-SIM-Human` 的 CLI 身份**执行 runner，并且**在普通终端里起**。agent run 会注入 `MULTICA_AGENT_ID` / `MULTICA_TOKEN`，CLI 于是以任务令牌认证、`--profile` 被无视；只 unset token 也不行，CLI 会拒绝。创建成员与 CLI profile 的步骤见 [`../docs/kar-sim-human-setup.md`](../docs/kar-sim-human-setup.md)；`scripts/multica-sim-human` 是加 profile 的包装脚本。
+2. 用 **`KAR-SIM-Human` 的 CLI 身份**执行 runner，并且**在普通终端、独立目录里起**：agent run 会注入 `MULTICA_AGENT_ID` / `MULTICA_TOKEN`，CLI 于是以任务令牌认证、`--profile` 被无视；Multica 的任务 worktree 还会因 `daemon_task_context.json` 直接拒绝本地 profile。所以先 `git clone` 一份评估仓到普通目录，再在那里跑。创建成员与 CLI profile 的步骤见 [`../docs/kar-sim-human-setup.md`](../docs/kar-sim-human-setup.md)；`scripts/multica-sim-human` 是加 profile 的包装脚本。
 3. 明确的 token / run 预算与超时。
 
 先跑只读自查（不建 issue、不消耗 run；6 项检查，任一失败退出码 2）：

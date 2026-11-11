@@ -9,7 +9,9 @@ like human approvals. These tests pin that behaviour down.
 from __future__ import annotations
 
 import json
+import tempfile
 import unittest
+from pathlib import Path
 
 from runner.identity import (
     CliIdentity,
@@ -78,7 +80,7 @@ class ParseTest(unittest.TestCase):
 
 class TaskEnvironmentTest(unittest.TestCase):
     def test_accepts_a_plain_shell(self):
-        check_task_environment({"PATH": "/bin"})
+        check_task_environment({"PATH": "/bin"}, cwd="/")
 
     def test_rejects_an_agent_task_token(self):
         with self.assertRaises(IdentityError) as caught:
@@ -90,11 +92,23 @@ class TaskEnvironmentTest(unittest.TestCase):
             check_task_environment({"MULTICA_AGENT_ID": "agent-1"})
         self.assertIn("plain terminal", str(caught.exception))
 
+    def test_rejects_a_daemon_task_worktree(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            marker = Path(tmp) / ".multica" / "daemon_task_context.json"
+            marker.parent.mkdir(parents=True)
+            marker.write_text("{}")
+            nested = Path(tmp) / "kar-squad-eval"
+            nested.mkdir()
+            with self.assertRaises(IdentityError) as caught:
+                check_task_environment({}, nested)
+        self.assertIn("daemon task", str(caught.exception))
+        self.assertIn("clone", str(caught.exception))
+
 
 class VerifyTest(unittest.TestCase):
     def test_passes_when_the_cli_is_the_simulation_human(self):
         cli = FakeCli(auth="User:    KAR-SIM-Human (sim@example.com)")
-        member = verify("multica", run=cli, env={})
+        member = verify("multica", run=cli, env={}, cwd="/")
         self.assertEqual(member.id, MEMBERS[0]["id"])
 
     def test_refuses_before_any_cli_call_under_a_task_token(self):
@@ -102,12 +116,12 @@ class VerifyTest(unittest.TestCase):
             raise AssertionError("must not call the CLI with a task token")
 
         with self.assertRaises(IdentityError):
-            verify("multica", run=boom, env={"MULTICA_TOKEN": "mat_x"})
+            verify("multica", run=boom, env={"MULTICA_TOKEN": "mat_x"}, cwd="/")
 
     def test_catches_the_cli_acting_as_the_operator(self):
         cli = FakeCli(auth="User:    karma (owner@example.com)")
         with self.assertRaises(IdentityError) as caught:
-            verify("multica", run=cli, env={})
+            verify("multica", run=cli, env={}, cwd="/")
         message = str(caught.exception)
         self.assertIn("authenticates as karma", message)
         self.assertIn("kar-sim-human", message)
@@ -115,20 +129,20 @@ class VerifyTest(unittest.TestCase):
     def test_requires_the_member_to_exist(self):
         cli = FakeCli(auth="User: KAR-SIM-Human (sim@example.com)", members=MEMBERS[1:])
         with self.assertRaises(IdentityError) as caught:
-            verify("multica", run=cli, env={})
+            verify("multica", run=cli, env={}, cwd="/")
         self.assertIn("no member named", str(caught.exception))
 
     def test_requires_a_plain_member_role(self):
         members = [dict(MEMBERS[0], role="owner")]
         cli = FakeCli(auth="User: KAR-SIM-Human (sim@example.com)", members=members)
         with self.assertRaises(IdentityError) as caught:
-            verify("multica", run=cli, env={})
+            verify("multica", run=cli, env={}, cwd="/")
         self.assertIn("role", str(caught.exception))
 
     def test_rejects_a_same_email_different_name(self):
         cli = FakeCli(auth="User: Another (sim@example.com)")
         with self.assertRaises(IdentityError) as caught:
-            verify("multica", run=cli, env={})
+            verify("multica", run=cli, env={}, cwd="/")
         self.assertIn("not KAR-SIM-Human", str(caught.exception))
 
 

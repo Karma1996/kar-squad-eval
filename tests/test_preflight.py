@@ -50,6 +50,7 @@ class PreflightTest(unittest.TestCase):
             assignee_id=SQUAD,
             cases_dir="cases",
             env={},
+            cwd="/",
             run=cli or FakeCli(),
             check_gh=False,
             **kwargs,
@@ -70,6 +71,7 @@ class PreflightTest(unittest.TestCase):
             project_id=PROJECT,
             assignee_id=SQUAD,
             env={"MULTICA_TOKEN": "mat_x"},
+            cwd="/",
             run=FakeCli(),
             check_gh=False,
         )
@@ -77,6 +79,26 @@ class PreflightTest(unittest.TestCase):
         environment = next(c for c in report.checks if c.name == "environment")
         self.assertFalse(environment.ok)
         self.assertIn("MULTICA_TOKEN", environment.detail)
+
+    def test_fails_inside_a_daemon_task_worktree(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            marker = Path(tmp) / ".multica" / "daemon_task_context.json"
+            marker.parent.mkdir(parents=True)
+            marker.write_text("{}")
+            report = run_preflight(
+                cli="multica",
+                project_id=PROJECT,
+                assignee_id=SQUAD,
+                cases_dir="cases",
+                env={},
+                cwd=tmp,
+                run=FakeCli(),
+                check_gh=False,
+            )
+        self.assertFalse(report.ok)
+        environment = next(c for c in report.checks if c.name == "environment")
+        self.assertFalse(environment.ok)
+        self.assertIn("daemon task", environment.detail)
 
     def test_fails_when_the_cli_acts_as_the_operator(self):
         report = self.build(FakeCli(auth="User:    karma (owner@example.com)"))
@@ -111,6 +133,7 @@ class PreflightTest(unittest.TestCase):
                 assignee_id=SQUAD,
                 cases_dir=str(root),
                 env={},
+                cwd="/",
                 run=FakeCli(),
                 check_gh=False,
             )
@@ -127,6 +150,7 @@ class PreflightTest(unittest.TestCase):
             cases_dir="cases",
             arena_repo="Karma1996/kar-sim-arena",
             env={},
+            cwd="/",
             run=FakeCli(),
             gh_run=lambda _args: (1, "", "not logged in"),
             check_gh=True,

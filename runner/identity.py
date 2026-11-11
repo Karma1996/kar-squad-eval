@@ -21,6 +21,7 @@ import os
 import re
 import subprocess
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
 Run = Callable[[Sequence[str]], "tuple[int, str, str]"]
@@ -90,14 +91,34 @@ def find_member(members: Sequence[Member], name: str) -> Member | None:
     return next((m for m in members if m.name.strip().casefold() == wanted), None)
 
 
-def check_task_environment(env: Mapping[str, str] | None = None) -> None:
-    """Refuse to run inside a Multica agent run.
+def find_daemon_task_marker(start: str | Path | None = None) -> Path | None:
+    """Return the daemon task marker above ``start``, if there is one.
+
+    A worktree created by the Multica daemon carries
+    ``.multica/daemon_task_context.json``. While that marker is above the
+    working directory the CLI refuses to use local profiles at all
+    (``daemon-managed task requires a task-local Multica config root``), so the
+    live runner must run from a plain clone elsewhere.
+    """
+    current = Path(start or Path.cwd()).resolve()
+    for directory in (current, *current.parents):
+        marker = directory / ".multica" / "daemon_task_context.json"
+        if marker.is_file():
+            return marker
+    return None
+
+
+def check_task_environment(
+    env: Mapping[str, str] | None = None, cwd: str | Path | None = None
+) -> None:
+    """Refuse to run inside a Multica agent run or daemon task worktree.
 
     The CLI detects an agent execution context (``MULTICA_AGENT_ID``) and then
     authenticates as the task token (``MULTICA_TOKEN``) regardless of
     ``--profile``. Unsetting only ``MULTICA_TOKEN`` is not enough: the CLI then
-    refuses with ``agent execution context requires MULTICA_TOKEN``. The live
-    runner has to start from a plain terminal.
+    refuses with ``agent execution context requires MULTICA_TOKEN``. The task
+    worktree is refused too, because its daemon marker disables local profiles.
+    The live runner has to start from a plain terminal and a plain directory.
     """
     env = os.environ if env is None else env
     token = env.get("MULTICA_TOKEN")
@@ -110,6 +131,14 @@ def check_task_environment(env: Mapping[str, str] | None = None) -> None:
             f"this shell is a Multica agent run ({where} set), so the CLI would "
             "authenticate as that task token and ignore the human profile. Run the "
             "live simulation from a plain terminal outside the agent run."
+        )
+    marker = find_daemon_task_marker(cwd)
+    if marker is not None:
+        raise IdentityError(
+            f"the working directory belongs to a Multica daemon task ({marker}), "
+            "where the CLI refuses to use local profiles. Clone the eval repo to an "
+            "ordinary directory and run from there, e.g. "
+            "`git clone git@github.com:Karma1996/kar-squad-eval.git ~/projects/kar-squad-eval`."
         )
 
 
@@ -157,13 +186,14 @@ def verify(
     expected_name: str = "KAR-SIM-Human",
     *,
     env: Mapping[str, str] | None = None,
+    cwd: str | Path | None = None,
     run: Run | None = None,
 ) -> Member:
     """Fail unless the CLI acts as the expected human workspace member.
 
     Returns the matching member row so callers can log the verified identity.
     """
-    check_task_environment(env)
+    check_task_environment(env, cwd)
     run = run or _subprocess_run(cli)
 
     identity = _cli_identity(run)
