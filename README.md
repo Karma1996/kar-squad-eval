@@ -27,7 +27,7 @@ python3 -m runner run --case cases/quick-01-hotfix.json \
 python3 -m runner score  --record /tmp/records/quick-01.json
 python3 -m runner report --records /tmp/records --baseline baselines/v4.4.json
 
-# 单测（98 条）
+# 单测（100 条）
 python3 -m unittest discover -s tests -t . -v
 ```
 
@@ -58,6 +58,13 @@ python3 -m runner preflight \
 python3 -m runner smoke \
     --project <sandbox-project-id> --assignee <squad-id> \
     --poll-seconds 120 --max-minutes 240
+```
+
+跑完出记分卡与首份基线（基线只从全绿的一轮写，失败轮会被拒绝）：
+
+```bash
+python3 -m runner report --records records --squad-version 4.4.0 \
+    --write-baseline baselines/v4.4.json
 ```
 
 单条重跑：

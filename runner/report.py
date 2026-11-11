@@ -177,6 +177,25 @@ def aggregate(
     )
 
 
+def baseline_payload(report: AggregateReport, squad_version: str = "") -> dict[str, Any]:
+    """Serialize a *green* scorecard as the next baseline.
+
+    Refusing a failing run is the point: a baseline recorded from a broken run
+    would make the next regression gate meaningless.
+    """
+    if not report.release_gate:
+        raise ValueError(
+            "refusing to write a baseline from a failing run: "
+            + "; ".join(report.reasons)
+        )
+    return {
+        "squad_version": squad_version or "4.4.0",
+        "soft": report.mean_score,
+        "lanes": {lane.lane: lane.mean_score for lane in report.lanes},
+        "cases": [item.case_id for item in report.results],
+    }
+
+
 def load_baseline(path: str | Path | None) -> dict[str, Any] | None:
     if not path:
         return None

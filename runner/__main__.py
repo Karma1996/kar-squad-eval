@@ -86,6 +86,11 @@ def main(argv: list[str] | None = None) -> int:
     report.add_argument("--baseline")
     report.add_argument("--squad-version", default="")
     report.add_argument("--json", action="store_true")
+    report.add_argument(
+        "--write-baseline",
+        metavar="PATH",
+        help="write this green scorecard as the baseline for the next run",
+    )
 
     args = parser.parse_args(argv)
     try:
@@ -276,12 +281,23 @@ def _score(args: argparse.Namespace) -> int:
 
 
 def _report(args: argparse.Namespace) -> int:
+    from .report import baseline_payload
+
     analyses = load_records_dir(args.records)
     report = aggregate(analyses, load_baseline(args.baseline))
     if args.json:
         print(json.dumps(report.as_dict(), ensure_ascii=False, indent=2))
     else:
         print(render_markdown(report, args.squad_version))
+    if args.write_baseline:
+        try:
+            payload = baseline_payload(report, args.squad_version)
+        except ValueError as exc:
+            raise RunnerError(str(exc)) from exc
+        Path(args.write_baseline).write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+        print(f"wrote baseline {args.write_baseline}", file=sys.stderr)
     return 0 if report.release_gate else 1
 
 

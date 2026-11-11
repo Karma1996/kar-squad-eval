@@ -10,7 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from kareval import analyze, load_record  # noqa: E402
-from runner.report import aggregate, render_markdown  # noqa: E402
+from runner.report import aggregate, baseline_payload, render_markdown  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "fixtures"
@@ -40,6 +40,18 @@ class AggregateTests(unittest.TestCase):
         report = aggregate(analyses, {"soft": 100.0, "lanes": {"quick": 90.0}})
         quick = next(lane for lane in report.lanes if lane.lane == "quick")
         self.assertIn("↑", quick.trend)
+
+    def test_baseline_payload_from_a_green_run(self):
+        analyses = [analyze(load_record(FIXTURES / "quick-01-pass.json"))]
+        payload = baseline_payload(aggregate(analyses), "4.4.0")
+        self.assertEqual(payload["squad_version"], "4.4.0")
+        self.assertEqual(payload["lanes"], {"quick": 100.0})
+        self.assertEqual(payload["cases"], ["quick-01"])
+
+    def test_baseline_refuses_a_failing_run(self):
+        analyses = [analyze(load_record(FIXTURES / "standard-02-stale-approval.json"))]
+        with self.assertRaises(ValueError):
+            baseline_payload(aggregate(analyses), "4.4.0")
 
     def test_json_shape(self):
         analyses = [analyze(load_record(FIXTURES / "quick-01-pass.json"))]
